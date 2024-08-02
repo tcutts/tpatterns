@@ -7,17 +7,6 @@ TPLIBDIR=/biosoft/lib/tpatterns
 BINDIR=/biosoft/bin
 MANDIR=/biosoft/man/man1
 
-# If you already have PCRE 1.09 or later compiled elsewhere, you may
-# wish to change the following appropriately
-PCRE_DIR=./pcre-1.09
-# Location of PCRE header file
-PCRE_INC=$(PCRE_DIR)
-# Location of compiled PCRE library
-PCRE_LIBDIR=$(PCRE_DIR)
-# Location of compiled PCRE libraries for dependency checking
-# (you can comment this out if you have a precompiled PCRE elsewhere)
-PCRE_LIBS=$(PCRE_LIBDIR)/libpcre.a
-
 # Add any extra compilation flags
 CFLAGS=-O2
 LFLAGS=-O2
