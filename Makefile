@@ -35,8 +35,9 @@ OBJS=compare.o fastlibs.o main.o options.o tim.o
 
 TPOBJS=translate.o errors.o fasta.o tpglobals.o
 TPLIB=libtp.a
+PROGS=txfasta tpatterns fasta2t
 
-all:	txfasta tpatterns fasta2t
+all: $(PROGS)
 
 # This target is for my use only
 dist:	clean
@@ -44,21 +45,21 @@ dist:	clean
 	mv ../tpatterns-$(VERSION).tar.gz ../../public_html/software/tpatterns
 
 clean:
-	$(RM) -f *.[oa] txfasta tpatterns tpatterns.1 *~
+	$(RM) -f *.[oa] $(PROGS) tpatterns.1 *~
 
-$(TPLIB):	$(TPOBJS)
+$(TPLIB): $(TPOBJS)
 	ar -cr $@ $(TPOBJS)
 
-tpatterns:	$(TPLIB) $(OBJS)
+tpatterns: $(TPLIB) $(OBJS)
 	$(LD) $(OBJS) $(TPLIB) $(PCRE_LFLAGS) $(LFLAGS) -o $@
 
-txfasta:	$(TPLIB) txfasta.o
+txfasta: $(TPLIB) txfasta.o
 	$(LD) txfasta.o $(TPLIB) $(LFLAGS) -o $@
 
-fasta2t:	$(TPLIB) fasta2t.o
+fasta2t: $(TPLIB) fasta2t.o
 	$(LD) fasta2t.o $(TPLIB) $(LFLAGS) -o $@
 
-install:	txfasta tpatterns tpatterns.1
+install: txfasta tpatterns tpatterns.1
 	( [ -d $(TPLIBDIR) ] || $(MKDIR) -p $(TPLIBDIR) )
 	$(CP) universal.txm gcg2txm.pl $(TPLIBDIR)
 	$(CP) txfasta $(BINDIR)

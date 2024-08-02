@@ -2,4 +2,6 @@
 *.a
 tpatterns
 txfasta
+fasta2t
+*.1
 *~
