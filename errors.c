@@ -12,12 +12,11 @@
 #include "tplib.h"
 
 const char *messages[] = {
-  "Success", /* TF_SUCCESS */
-  "Memory allocation failure", /* TF_MEM */
-  "Premature end of matrix file", /* TF_MXEOF */
-  "Could not open file for output",
-  "Sequence length exceeds MAXSEQLEN"
-};
+    "Success",                      /* TF_SUCCESS */
+    "Memory allocation failure",    /* TF_MEM */
+    "Premature end of matrix file", /* TF_MXEOF */
+    "Could not open file for output",
+    "Sequence length exceeds MAXSEQLEN"};
 
 void tp_error(tperror code)
 {

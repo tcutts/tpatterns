@@ -18,24 +18,24 @@ int read_tim(FILE *f)
 
   n = fread(len, sizeof(int), 2, f);
 
-  if (n<1)
-    {
-      if (n<0) 
-	perror("Error reading file:");
-      return 0;
-    }
-  
-  if (len[1]>MAXSEQLEN)
-    {
-      tp_error(TPERR_SEQLEN);
-      return 0;
-    }
+  if (n < 1)
+  {
+    if (n < 0)
+      perror("Error reading file:");
+    return 0;
+  }
+
+  if (len[1] > MAXSEQLEN)
+  {
+    tp_error(TPERR_SEQLEN);
+    return 0;
+  }
 
   fread(seqtitle, sizeof(char), len[0], f);
-  seqtitle[len[0]]='\0';
+  seqtitle[len[0]] = '\0';
 
   fread(seqbuf, sizeof(char), len[1], f);
-  seqbuf[len[1]]='\0';
+  seqbuf[len[1]] = '\0';
 
   return len[1];
 }

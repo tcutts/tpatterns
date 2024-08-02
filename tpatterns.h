@@ -10,7 +10,6 @@
 
 #include <limits.h>
 #include <stdio.h>
-#include <pcre.h>
 #include <mpi.h>
 #include "tplib.h"
 
@@ -50,13 +49,14 @@
 #define DB_TIM 'T'
 
 /* Definition for linked list of library files to be searched */
-typedef struct {
-  void *next;
-  char *title;
-  char *file;
-  char fmt;
-  char letter;
-  char dbtype;
+typedef struct
+{
+   void *next;
+   char *title;
+   char *file;
+   char fmt;
+   char letter;
+   char dbtype;
 } libent;
 
 /* Global variables in main.c */
