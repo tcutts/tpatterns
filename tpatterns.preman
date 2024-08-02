@@ -1,0 +1,312 @@
+.\"  -*- nroff -*-
+.\"
+.TH tpatterns 1 "TPatterns" "May 13, 1998" "Tim Cutts"
+
+.SH NAME
+TF_BIN/tpatterns \- matches amino acid patterns against DNA or protein
+databases
+
+.SH SYNOPSIS
+.LP
+.B tpatterns
+[\c
+.B \-1\c
+]
+[\c
+.BI \-l "\ library-file\c
+]
+[\c
+.BI \-m "\ translation-matrix\c
+]
+[\c
+.BI \-o "\ output-file\c
+]
+[[\c
+.I aa pattern\c
+] [\c
+.I databases\c
+]]
+.LP
+.B txfasta
+[\c
+.BI \-m "\ translation-matrix\c
+]
+.SH DESCRIPTION 
+.LP
+.B tpatterns
+compares amino acid patterns against DNA and protein
+sequence databases, in a similar manner to the GCG
+.B findpatterns
+program.  However,
+.B tpatterns
+translates nucleic acid sequences on the fly so that they can be compared
+to amino acid patterns.  It understands sequence databases in both
+GCG and FASTA formats.
+.LP
+The patterns are given as Perl-like regular expressions, rather than the
+.B findpatterns
+language.  See the examples section for more detail.
+.LP
+If run without any options,
+.B tpatterns
+operates in interactive mode and will prompt you for input.
+.LP
+.B txfasta
+takes a nucleic acid FASTA format database on standard input, and
+prints a FASTA format protein database on standard output, translated
+in all six reading frames.
+
+.SH OPTIONS
+
+.TP 0.6i
+.BI \-l "\ library-file
+Specifies the file which tells
+.B tpatterns
+where the databases are.  The format of this file is described in the
+FASTLIBS section below.
+
+.TP
+.BI \-m "\ translation-matrix
+By default, nucleic sequences are translated using the universal
+genetic code.  If you wish to use other coding schemes, you should use
+this option to specify an alternative matrix.  The format of matrix
+files is given in the TRANSLATION MATRIX section below.  This option
+is ignored when searching protein databanks.
+
+.TP
+.BI \-o "\ output-file
+Specify a file in which to place the output.  If this is not
+specified, the program defaults to printing its results to standard
+output (usually the screen).
+
+.TP
+.B \-1
+Stops after the first possible match in each reading frame.  Without
+this option, the program will continue to search for further possible
+matches in each frame.  This option makes the search much faster, at
+the possible expense of reporting the wrong match in a sequence.
+In other words, it will not cause the program to fail to find
+sequences, but if the match occurs in more than one form in the
+sequence, it will only find the first possible occurrence.
+
+.TP
+.B pattern
+The pattern to be searched for.  See the PATTERNS section of this
+manpage for a description.
+
+.TP
+.B databases
+List of databases to search, as given by the letter they have been
+designated in the library file.  This is
+.I not
+a filename to search.
+
+.SH PATTERNS
+.LP
+The pattern format required from this program is very different from
+that required by the
+.B findpatterns
+program.
+
+.LP
+Patterns are made up of a series of tokens, each of which may be followed
+by a modifier which describes a repeat number for the token.  These
+modifiers are:  (a)
+.I ?
+which means 0 or 1 copies of the token, (b)
+.I *
+which means 0 or more copies of the token, (c)
+.I +
+which means 1 or more copies of the token or (d)
+.I {m,n}
+which means between m and n copies of the token.  A
+.I ?
+after any of these modifiers causes the program to find larger
+matches if at all possible; the default is to find smaller matches.
+Note that this is the opposite of the meaning of the ? modifier in Perl
+regular expressions.
+
+.PP
+A token is either a character (corresponding to a single residue), a set
+of characters in square brackets, or an entire regular expression in round
+brackets.
+
+.PP
+The character
+.B |
+can be used within regular expressions in round brackets to indicate
+alternatives.
+
+.PP
+The symbol
+.B X
+matches any codon except a stop codon.  The symbol
+.B .
+matches any codon including stop codons.
+
+.PP
+Because
+.B *
+is the symbol for a stop codon, but also has meaning in the regular
+expression language, if you wish to search for a stop codon you must
+insert a \\ character before the *.
+
+.PP
+So, some examples:
+
+.PP
+.TP 0.6i
+.B PSTAIRE
+Trivially matches PSTAIRE.
+
+.TP
+.B P[CS]TAIRE
+Matches PSTAIRE or PCTAIRE.
+
+.TP
+.B PX{3,6}KK
+Matches P, followed by 3-6 residues of any sort, followed by KK, with
+a bias towards there being 3 residues in between.
+
+.TP
+.B PX{3,6}?KK
+Is the same, but biased towards 6 residues in between.
+
+.TP
+.B ([HK]DEL|KXKXX)
+Matches any sequence containing HDEL, KDEL or KXKXX.
+
+.SH EXAMPLES
+
+.TP 0.6i
+.TP
+.B tpatterns -1 '(KKXX?){4,}?' P
+Search the OWL database for sequences containing four or more tandem
+repeats of the sequence KKX or KKXX, reporting only the first match
+found in each sequence.  This sort of approach could for example be
+used to look for amphiphilic alpha helices.
+
+.SH CONSIDERATIONS
+
+.TP 0.6i
+.B Ambiguous bases in library sequences
+In the interest of speed when translating nucleic acid libraries,
+tpatterns does not attempt to translate ambiguous bases, even if a
+straightforward translation might have been possible.  For example, in
+the universal genetic code, GCN is always Alanine.  tpatterns does not
+know this, however, and to include the logic to detect such cases
+would make the program extremely slow.  Therefore, in such cases,
+tpatterns translates the codon as X.
+
+.TP
+.B Ambiguity in patterns
+Obviously having ambiguities in your search pattern slows the search
+down.  This is particularly true if the first token in your pattern is
+X or a [] construct.  Try to avoid this by starting your pattern with
+a specific residue, if you can.  For example, P[CS]TAIRE is much
+faster than [CS]TAIRE.
+
+.SH ADVANCED TOPICS
+
+You do not need to read the rest of this document unless you wish to
+search your own databases rather than those maintained by the system
+administrators.
+
+.SH ENVIRONMENT VARIABLES
+
+.TP 0.6i
+.B FASTLIBS
+The library desciption file to use.  The setting of this environment
+variable is ignored if the
+.B \-l
+option is specified on the command line.  Either the environment variable
+or the command line option must be specified.  See the FASTLIBS
+section of this manpage for details of the format of this file.
+.TP
+.B TP_TXMDIR
+Specifies a directory in which codon -> amino acid translation tables
+may be found.  This defaults to TF_LIB
+
+.SH FASTLIBS FILE FORMAT
+
+.PP
+The FASTLIBS library file format consists of a number of lines of the
+form:
+.PP
+OWL Protein$0P/data/OWL/owl.tfa 0
+.PP
+This consists of 5 fields.  The first field, up to the
+.B $
+character, is the textual description of the database.  The character
+after the $ (0 in this example) describes whether the database is
+protein (\c
+.B 0\c
+) or nucleic acid (\c
+.B 1\c
+).  The next character (P in the example) gives the character the user
+should type to search that database.  This is followed by a filename,
+optionally preceded by a
+.B @
+character.  If the filename does not have an @ character, this
+filename is the actual sequence data file, and the final number
+describes what the format of that data file is.  Currently,
+.B tpatterns
+only supports two formats, FASTA (\c
+.B 0\c
+) and GCG (\c
+.B 6\c
+).
+.PP
+If the filename is preceded by an @, the database format field should
+not be given; in this case the filename refers to a file which is a
+list of the sequence files which make up that database.  The lines in
+this file are simply a filename followed by the format of each file.
+For example, the Bacterial entry in the default FASTLIBS file on mole
+reads as follows:
+.PP
+Bacterial$1B@/biosoft/lib/fasta/prokaryote.fasta
+.PP
+and the contents of /biosoft/lib/fasta/prokaryote.fasta are:
+.PP
+.PD 0
+/data/gcgembl/em_pro.seq 6
+.PP
+/data/gb/gb_ba.seq 6
+.PD 1
+.PP
+.SH TRANSLATION MATRIX FILE FORMAT
+See
+.B TF_LIB/universal.txm
+in this distribution; translation matrix files are 64 line files
+consisting of all the possible codons AAA, AAC, AAG, AAT ... TTT.  The
+codons must be in this alphabetical order.  After some whitespace
+there is a single character which gives the translation for that
+codon.  The default directory in which
+.B tpatterns
+will search for these matrices is TF_LIB
+.PP
+A perl script is included with this distribution,
+.BR TF_LIB/gcg2txm.pl ,
+which converts GCG nucleic acid translation files into tpatterns
+format.  For example, universal.txm was created as follows:
+.PP
+.PD 0
+gcg
+.PP
+fetch translate.txt
+.PP
+gcg2txm.pl translate.txt > universal.txm
+.PD 1
+.PP
+
+.SH FILES
+TF_LIB
+
+.SH SEE ALSO
+.BR perlre (1),
+.BR pcre (3)
+
+.SH AUTHOR
+.LP
+Tim Cutts <tjrc1@bioc.cam.ac.uk>
+
