@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <pcre.h>
 #include "tpatterns.h"
 
 static pcre_extra *hints;
